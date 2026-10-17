@@ -1,0 +1,534 @@
+<!-- claude:viewport-fit-sides cover -->
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Hoja de Ruta VIRAR</title>
+<style>
+/*
+  Design plan — v2, editorial pass
+  Layout: a cartographic "route" runs through the whole page — a dashed line with
+  waypoint dots opens the hero, becomes the quiz's progress trail, and resolves into
+  a connected vertical timeline on the result screen (the five stops of VIRAR). The
+  route is the content (this literally is a "hoja de ruta"), not surface decoration.
+  Color: warm graphite dark ground, petrol-green accent (Potenciarte's established
+  palette) plus one quiet paper-toned neutral reserved for the diagnosis card, read
+  as a page torn from the route itself rather than a tinted alert box.
+  Type: Fraunces (display serif, set large and loose — the one bold risk) paired with
+  Archivo (body/UI) and tabular figures for the revenue ranges.
+*/
+:root{
+  --bg:#121210; --bg-2:#19180f; --surface:#1c1e1a; --surface-2:#262822;
+  --fg:#f3f1e7; --fg-muted:#9c9c8d; --border:#303128;
+  --accent:#34917a; --accent-strong:#49c9a6; --accent-fg:#06110d; --accent-soft:rgba(52,145,122,.14);
+  --paper:#efe8d6; --paper-fg:#1c1a12; --paper-muted:#6e6a57;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#f7f5ee; --bg-2:#efece0; --surface:#ffffff; --surface-2:#f0eee3;
+    --fg:#171812; --fg-muted:#68685c; --border:#e1ddcb;
+    --accent:#0f3d3e; --accent-strong:#0c5c4b; --accent-fg:#ffffff; --accent-soft:rgba(15,61,62,.08);
+    --paper:#ffffff; --paper-fg:#171812; --paper-muted:#6e6a57;
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"]{
+  --bg:#f7f5ee; --bg-2:#efece0; --surface:#ffffff; --surface-2:#f0eee3;
+  --fg:#171812; --fg-muted:#68685c; --border:#e1ddcb;
+  --accent:#0f3d3e; --accent-strong:#0c5c4b; --accent-fg:#ffffff; --accent-soft:rgba(15,61,62,.08);
+  --paper:#ffffff; --paper-fg:#171812; --paper-muted:#6e6a57;
+  color-scheme: light;
+}
+
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0; background:var(--bg); color:var(--fg);
+  font-family:'Archivo',-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  padding-left:max(16px, env(safe-area-inset-left,0px));
+  padding-right:max(16px, env(safe-area-inset-right,0px));
+  background-image:
+    radial-gradient(640px 320px at 85% -8%, var(--accent-soft), transparent 70%),
+    linear-gradient(var(--bg-2), var(--bg) 320px);
+  background-repeat:no-repeat;
+}
+.wrap{max-width:640px;margin:0 auto;padding-block:30px 70px; position:relative;}
+h1,h2,h3{font-family:'Fraunces',Georgia,serif; text-wrap:balance; margin:0; font-weight:560;}
+em{font-style:italic; color:var(--accent-strong);}
+.eyebrow{
+  font-size:.72rem; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--accent-strong); font-weight:600; display:flex; align-items:center; gap:9px;
+}
+.eyebrow svg{width:18px;height:18px;opacity:.9;}
+p{line-height:1.6; color:var(--fg-muted); margin:0;}
+.lede{color:var(--fg); font-size:1.08rem; line-height:1.62; max-width:46ch;}
+
+/* decorative route line (hero) */
+.route-art{position:relative; height:58px; margin:22px 0 4px;}
+.route-art svg{position:absolute; inset:0; width:100%; height:100%; overflow:visible;}
+.route-art .trail{stroke:var(--accent); stroke-width:1.6; stroke-dasharray:1 9; stroke-linecap:round; fill:none; opacity:.85;}
+.route-art .node{fill:var(--bg); stroke:var(--accent); stroke-width:1.6;}
+.route-art .node.on{fill:var(--accent); stroke:var(--accent);}
+
+/* route progress (quiz) */
+.route{display:flex; align-items:center; gap:4px; margin:20px 0 28px;}
+.route .node-wrap{display:flex; align-items:center; flex:1;}
+.route .node-wrap:last-child{flex:0;}
+.route .dot{
+  width:11px; height:11px; min-width:11px; border-radius:50%; border:1.6px solid var(--border);
+  background:var(--surface); transition:all .25s ease; position:relative;
+}
+.route .dot.done{background:var(--accent); border-color:var(--accent);}
+.route .dot.active{border-color:var(--accent); box-shadow:0 0 0 4px var(--accent-soft);}
+.route .dot.active::after{
+  content:""; position:absolute; inset:-5px; border-radius:50%; border:1.5px dashed var(--accent);
+  animation:spin 6s linear infinite;
+}
+.route .line{flex:1; height:1.5px; background-image:linear-gradient(90deg, var(--border) 0 60%, transparent 0); background-size:7px 1.5px; margin:0 3px;}
+.route .line.done{background:var(--accent); background-image:none;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+.route-label{font-size:.76rem; color:var(--fg-muted); margin-bottom:8px; display:flex; justify-content:space-between; letter-spacing:.02em;}
+
+.card{
+  background:var(--surface); border:1px solid var(--border); border-radius:16px;
+  padding:28px 26px; margin-top:4px; box-shadow:0 1px 0 rgba(0,0,0,.2), 0 18px 40px -28px rgba(0,0,0,.6);
+}
+.step{display:none;}
+.step.active{display:block; animation:fade .4s cubic-bezier(.2,.8,.2,1);}
+@keyframes fade{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;}}
+
+.q-title{font-family:'Fraunces',serif; font-weight:560; font-size:1.55rem; line-height:1.28; margin-bottom:6px;}
+.q-sub{margin-bottom:22px;}
+
+label.field{display:block; margin-top:18px;}
+label.field span{display:block; font-size:.8rem; color:var(--fg-muted); margin-bottom:7px; letter-spacing:.01em;}
+input[type=text], input[type=email], input[type=tel]{
+  width:100%; padding:15px 17px; font-size:1rem; font-family:inherit; color:var(--fg);
+  background:var(--surface-2); border:1px solid var(--border); border-radius:11px; outline:none;
+  transition:border-color .15s, box-shadow .15s;
+}
+input:focus{border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft);}
+input::placeholder{color:var(--fg-muted); opacity:.65;}
+
+.choices{display:flex; flex-direction:column; gap:10px; margin-top:4px;}
+.choice{
+  text-align:left; width:100%; padding:15px 16px; border-radius:13px;
+  border:1px solid var(--border); background:var(--surface-2); color:var(--fg);
+  font-family:inherit; font-size:.97rem; cursor:pointer; line-height:1.42;
+  display:flex; align-items:center; gap:14px; transition:border-color .15s, background .15s, transform .12s;
+}
+.choice:hover{border-color:var(--accent); transform:translateX(2px);}
+.choice .badge{
+  width:30px; height:30px; min-width:30px; border-radius:9px; display:flex; align-items:center;
+  justify-content:center; font-family:'Fraunces',serif; font-size:.92rem; font-weight:600;
+  background:var(--surface); border:1px solid var(--border); color:var(--fg-muted);
+  transition:all .15s;
+}
+.choice.sel{border-color:var(--accent); background:var(--accent-soft);}
+.choice.sel .badge{background:var(--accent); border-color:var(--accent); color:var(--accent-fg);}
+
+.actions{display:flex; justify-content:space-between; align-items:center; margin-top:28px; gap:12px;}
+.btn{
+  font-family:inherit; font-size:.95rem; font-weight:600; cursor:pointer; border:none;
+  border-radius:999px; padding:15px 28px; transition:transform .12s ease, opacity .15s, box-shadow .15s;
+}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:var(--accent); color:var(--accent-fg); box-shadow:0 10px 24px -12px var(--accent);}
+.btn-primary:disabled{opacity:.3; cursor:not-allowed; box-shadow:none;}
+.btn-ghost{background:transparent; color:var(--fg-muted); padding:15px 8px;}
+.btn-ghost:hover{color:var(--fg);}
+.hint{font-size:.78rem; color:var(--fg-muted); margin-top:16px;}
+
+/* hero */
+.hero{padding-top:4px;}
+.hero h1{font-size:2.3rem; line-height:1.14; margin:18px 0 16px; letter-spacing:-.01em;}
+.hero-card{margin-top:6px;}
+.pill-row{display:flex; flex-wrap:wrap; gap:8px; margin-top:20px;}
+.pill{
+  font-size:.74rem; color:var(--fg-muted); border:1px solid var(--border);
+  padding:7px 13px; border-radius:999px; background:var(--surface-2);
+}
+
+/* result */
+.result-head{text-align:left;}
+.result-head .eyebrow{margin-bottom:12px;}
+.result-head h2{font-size:1.95rem; margin-bottom:10px;}
+.diag-box{
+  margin-top:20px; padding:26px; border-radius:16px; background:var(--paper); color:var(--paper-fg);
+  box-shadow:0 1px 0 rgba(0,0,0,.15), 0 24px 50px -30px rgba(0,0,0,.55);
+  position:relative; overflow:hidden;
+}
+.diag-box::before{
+  content:""; position:absolute; inset:0; opacity:.5; pointer-events:none;
+  background-image:repeating-linear-gradient(115deg, rgba(0,0,0,.035) 0 1px, transparent 1px 26px);
+}
+.diag-top{display:flex; align-items:center; gap:12px; margin-bottom:16px; position:relative;}
+.diag-mark{
+  width:40px; height:40px; min-width:40px; border-radius:50%; background:var(--accent); color:var(--accent-fg);
+  display:flex; align-items:center; justify-content:center; font-family:'Fraunces',serif; font-weight:600;
+}
+.diag-box .solution-name{
+  font-family:'Fraunces',serif; font-size:1.2rem; font-weight:560; color:var(--paper-fg); position:relative;
+}
+.diag-box .solution-tag{font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--paper-muted);}
+.diag-box p{color:var(--paper-fg); opacity:.82; position:relative; font-size:.97rem;}
+
+.waypoints{margin-top:26px;}
+.wp-list{position:relative; padding-left:8px;}
+.wp-list::before{content:""; position:absolute; left:23px; top:6px; bottom:6px; width:1.5px; background:var(--border);}
+.waypoint{display:flex; gap:16px; padding:15px 0; position:relative;}
+.wp-marker{
+  width:34px; height:34px; min-width:34px; border-radius:50%; display:flex; align-items:center;
+  justify-content:center; font-family:'Fraunces',serif; font-size:.95rem; font-weight:600; z-index:1;
+  background:var(--surface); border:1.5px solid var(--border); color:var(--fg-muted);
+}
+.waypoint.open .wp-marker{background:var(--accent); color:var(--accent-fg); border-color:var(--accent); box-shadow:0 0 0 5px var(--accent-soft);}
+.wp-body h3{font-size:1.02rem; margin-bottom:2px; font-weight:560;}
+.waypoint.locked .wp-body h3{color:var(--fg-muted);}
+.wp-body p{font-size:.88rem;}
+
+.urgency{
+  margin-top:22px; padding:17px 19px; border-radius:13px; border:1px solid var(--border);
+  background:var(--surface-2); font-size:.9rem; color:var(--fg); display:flex; gap:12px; align-items:flex-start;
+}
+.urgency svg{min-width:18px; margin-top:2px; color:var(--accent-strong);}
+
+.confirm{display:none; margin-top:18px; padding:18px 20px; border-radius:13px; background:var(--accent-soft); border:1px solid var(--border); gap:12px; align-items:flex-start;}
+.confirm.show{display:flex; animation:fade .3s ease;}
+.confirm svg{min-width:20px; color:var(--accent-strong); margin-top:1px;}
+
+footer{margin-top:50px; font-size:.74rem; color:var(--fg-muted); line-height:1.65; text-align:center;}
+footer .brand{font-family:'Fraunces',serif; color:var(--fg); font-size:.85rem; margin-bottom:4px;}
+footer .proto{margin-top:10px; opacity:.65;}
+
+@media (max-width:420px){
+  .hero h1{font-size:1.85rem;}
+  .card{padding:22px 19px;}
+  .diag-box{padding:20px;}
+}
+</style>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,560;0,650;1,500&family=Archivo:wght@400;500;600;700&display=swap">
+
+<div class="wrap">
+
+  <!-- INTRO -->
+  <section id="screen-intro" class="screen">
+    <div class="eyebrow">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.4"/><path d="M15.5 8.5L13 13L8.5 15.5L11 11L15.5 8.5Z" fill="currentColor"/></svg>
+      Hoja de Ruta VIRAR
+    </div>
+    <div class="hero">
+      <h1>Descubrí qué te está <em>estancando</em>. Gratis, en 2 minutos.</h1>
+      <p class="lede">Respondé 4 preguntas cortas y recibí tu Hoja de Ruta VIRAR: el primer paso para volver a dirigir la empresa que ya construiste, en vez de ser llevado por ella.</p>
+      <div class="route-art">
+        <svg viewBox="0 0 560 58" preserveAspectRatio="none">
+          <path class="trail" d="M4 50 C 120 50, 150 10, 280 28 S 450 52, 554 8"/>
+          <circle class="node on" cx="4" cy="50" r="5"/>
+          <circle class="node" cx="143" cy="23" r="5"/>
+          <circle class="node" cx="280" cy="28" r="5"/>
+          <circle class="node" cx="420" cy="42" r="5"/>
+          <circle class="node" cx="554" cy="8" r="5"/>
+        </svg>
+      </div>
+    </div>
+    <div class="card hero-card">
+      <p style="color:var(--fg); font-weight:600; margin-bottom:8px;">Esto es para vos si:</p>
+      <div class="pill-row">
+        <span class="pill">Tu empresa ya factura</span>
+        <span class="pill">Llevás años construyéndola</span>
+        <span class="pill">Sentís que algo se estancó</span>
+      </div>
+      <div class="actions" style="margin-top:24px;">
+        <button class="btn btn-primary" onclick="goTo(1)">Empezar</button>
+        <span class="hint" style="margin:0;">Sin tarjeta. Sin spam.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="screen-quiz" class="screen" style="display:none;">
+    <div class="route-label"><span id="routeLabel">Paso 1 de 5</span><span id="routePct">20%</span></div>
+    <div class="route" id="route"></div>
+
+    <div class="card">
+      <div class="step" data-step="1">
+        <div class="q-title">¿Cómo te llamás?</div>
+        <p class="q-sub">Así vas a ver tu Hoja de Ruta con tu nombre.</p>
+        <label class="field"><span>Nombre de pila</span>
+          <input type="text" id="f_nombre" placeholder="Ej: Agustín" autocomplete="given-name">
+        </label>
+      </div>
+
+      <div class="step" data-step="2">
+        <div class="q-title">¿Cuál de estas frases te representa mejor hoy?</div>
+        <p class="q-sub">Elegí la que más se sienta como vos ahora mismo.</p>
+        <div class="choices" id="choices-dolor"></div>
+      </div>
+
+      <div class="step" data-step="3">
+        <div class="q-title">¿Hace cuánto sentís esto, aunque tu empresa siga funcionando?</div>
+        <p class="q-sub">&nbsp;</p>
+        <div class="choices" id="choices-tiempo"></div>
+      </div>
+
+      <div class="step" data-step="4">
+        <div class="q-title">¿Cuál es la facturación mensual aproximada de tu empresa?</div>
+        <p class="q-sub">Esto nos ayuda a armar una hoja de ruta más precisa.</p>
+        <div class="choices" id="choices-facturacion"></div>
+      </div>
+
+      <div class="step" data-step="5">
+        <div class="q-title">¿A dónde te enviamos tu Hoja de Ruta?</div>
+        <p class="q-sub">&nbsp;</p>
+        <label class="field"><span>Email</span>
+          <input type="email" id="f_email" placeholder="vos@tuempresa.com" autocomplete="email">
+        </label>
+        <label class="field"><span>WhatsApp</span>
+          <input type="tel" id="f_whatsapp" placeholder="+54 9 11 1234 5678" autocomplete="tel">
+        </label>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-ghost" id="btnBack" onclick="back()">Atrás</button>
+        <button class="btn btn-primary" id="btnNext" onclick="next()" disabled>Continuar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULT -->
+  <section id="screen-result" class="screen" style="display:none;">
+    <div class="result-head">
+      <div class="eyebrow">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.4"/><path d="M15.5 8.5L13 13L8.5 15.5L11 11L15.5 8.5Z" fill="currentColor"/></svg>
+        Tu Hoja de Ruta
+      </div>
+      <h2 id="resultTitle">Hola</h2>
+      <p id="resultIntro"></p>
+    </div>
+
+    <div class="diag-box">
+      <div class="diag-top">
+        <div class="diag-mark">V</div>
+        <div>
+          <div class="solution-tag">Punto de partida — Ver</div>
+          <div class="solution-name" id="solutionName"></div>
+        </div>
+      </div>
+      <p id="solutionText"></p>
+    </div>
+
+    <div class="urgency" id="urgencyBox">
+      <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M12 7V12.5L15.5 15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.6"/></svg>
+      <span id="urgencyText"></span>
+    </div>
+
+    <div class="waypoints card">
+      <div class="wp-list">
+        <div class="waypoint open">
+          <div class="wp-marker">V</div>
+          <div class="wp-body"><h3>Ver</h3><p>Tu punto de partida — ya lo acabás de hacer arriba.</p></div>
+        </div>
+        <div class="waypoint locked">
+          <div class="wp-marker">I</div>
+          <div class="wp-body"><h3>Interpretar</h3><p>Cambiar la lectura automática de tu situación.</p></div>
+        </div>
+        <div class="waypoint locked">
+          <div class="wp-marker">R</div>
+          <div class="wp-body"><h3>Resolver</h3><p>Elegir qué conservar, cambiar o abandonar.</p></div>
+        </div>
+        <div class="waypoint locked">
+          <div class="wp-marker">A</div>
+          <div class="wp-body"><h3>Actuar</h3><p>Convertir la elección en una acción concreta.</p></div>
+        </div>
+        <div class="waypoint locked">
+          <div class="wp-marker">R</div>
+          <div class="wp-body"><h3>Reforzar</h3><p>Sostener el cambio para que no quede en una revelación.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:22px;">
+      <p style="color:var(--fg); font-weight:600; margin-bottom:14px;">Esto es un primer diagnóstico orientativo. En Potenciarte (5 semanas) lo profundizamos con tu caso real.</p>
+      <div class="actions" style="justify-content:flex-start;">
+        <button class="btn btn-primary" onclick="confirmInterest()">Quiero mi lugar en Potenciarte</button>
+      </div>
+      <div class="confirm" id="confirmBox">
+        <svg viewBox="0 0 24 24" fill="none" width="20" height="20"><path d="M5 12.5L9.5 17L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span><strong>Listo.</strong> Te escribimos por WhatsApp para coordinar tu lugar en Potenciarte y contarte los próximos cupos.</span>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="brand">Potenciarte — Tito Capozzoli</div>
+    Método VIRAR
+    <div class="proto">Prototipo de flujo para revisión interna. Conectar a una herramienta de captura real (formulario público + automatización) antes de publicar el link.</div>
+  </footer>
+</div>
+
+<script>
+const DOLORES = [
+  {id:'A', label:'No sé bien qué es lo que está fallando en mi empresa.',
+   solution:'Diagnóstico de Realidad Empresarial',
+   title:'No sabés bien qué está fallando — y ahí empieza todo.',
+   text:'Tu primer paso en VIRAR es Ver: construir un Diagnóstico de Realidad Empresarial. No es leer más contenido de negocios ni pedir consejos sueltos — es mirar tu empresa tal cual está, sin maquillaje, para saber qué te está estancando antes de mover nada.'},
+  {id:'B', label:'Trabajo todo el día, pero no sé si estoy avanzando.',
+   solution:'Auditoría de Progreso Empresarial',
+   title:'Estar ocupado no es lo mismo que avanzar.',
+   text:'Tu primer paso en VIRAR es Ver: una Auditoría de Progreso Empresarial. En vez de medir tu semana por las horas trabajadas, revisamos los indicadores que importan de verdad y los contrastamos con tus objetivos.'},
+  {id:'C', label:'Tengo demasiados problemas y no sé cuál resolver primero.',
+   solution:'Mapa de Cuellos de Botella',
+   title:'No todos los problemas pesan igual.',
+   text:'Tu primer paso en VIRAR es Ver: un Mapa de Cuellos de Botella. En vez de atacar todo a la vez o lo que más ruido hace, identificamos qué está frenando de verdad el funcionamiento, la rentabilidad o el crecimiento.'},
+  {id:'D', label:'Todo depende de mí. No logro delegar.',
+   solution:'Sistema de Autonomía Empresarial',
+   title:'Si todo depende de vos, no tenés una empresa — tenés un empleo exigente.',
+   text:'Tu primer paso en VIRAR es Ver cómo está armada tu estructura hoy. Después se trabaja un Sistema de Autonomía Empresarial: procesos, responsabilidades y seguimiento para que tu equipo sostenga resultados sin que todo pase por vos.'},
+  {id:'E', label:'Sé lo que tengo que hacer, pero no lo termino haciendo.',
+   solution:'Sistema de Ejecución Empresarial',
+   title:'Sabés qué hacer. El problema es que no termina pasando.',
+   text:'Tu primer paso en VIRAR es Ver qué se frena entre la decisión y la acción. Después se trabaja un Sistema de Ejecución Empresarial: acciones concretas y seguimiento real para que las decisiones se conviertan en cambios, no en intenciones.'},
+  {id:'F', label:'Mejoro un tiempo y vuelvo a caer en el mismo desorden.',
+   solution:'Sistema de Continuidad Empresarial',
+   title:'Mejorás un tiempo. Después, todo vuelve a lo mismo.',
+   text:'Tu primer paso en VIRAR es Ver por qué no se sostiene el cambio. Después se trabaja un Sistema de Continuidad Empresarial: indicadores y rutinas de revisión para que el avance no dependa solo de tu motivación del momento.'},
+];
+
+const TIEMPOS = [
+  {id:'t1', label:'Menos de 3 meses', urgency:'Recién estás notando esto — es el mejor momento para actuar antes de que se vuelva costumbre.'},
+  {id:'t2', label:'Entre 3 y 6 meses', urgency:'Ya pasaron varios meses sintiendo esto. Todavía es reciente, pero no se resuelve solo.'},
+  {id:'t3', label:'Entre 6 meses y 1 año', urgency:'Hace más de 6 meses que convivís con esto — es el momento en que empieza a sentirse "normal", y ahí es cuando más cuesta salir.'},
+  {id:'t4', label:'Más de 1 año', urgency:'Hace más de un año que sentís esto. Cuanto más tiempo pasa, más se naturaliza, y más cuesta distinguir cuál es realmente el problema.'},
+];
+
+const FACTURACION = [
+  {id:'f1', label:'Menos de 5.000 USD'},
+  {id:'f2', label:'Entre 5.000 y 15.000 USD'},
+  {id:'f3', label:'Entre 15.000 y 50.000 USD'},
+  {id:'f4', label:'Más de 50.000 USD'},
+];
+
+const state = {nombre:'', dolor:null, tiempo:null, facturacion:null, email:'', whatsapp:''};
+let current = 0;
+const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxdINwysOZcdQJRQx39GhSqtI2bTVppn-AAyaAqdyQhQxWXRguQfBU9SXXIHXML1OM/exec';
+
+function renderChoices(containerId, items, field){
+  const el = document.getElementById(containerId);
+  el.innerHTML = items.map((it,i) => `
+    <button type="button" class="choice" data-id="${it.id}" onclick="selectChoice('${field}','${it.id}','${containerId}')">
+      <span class="badge">${String.fromCharCode(65+i)}</span><span>${it.label}</span>
+    </button>`).join('');
+}
+renderChoices('choices-dolor', DOLORES, 'dolor');
+renderChoices('choices-tiempo', TIEMPOS, 'tiempo');
+renderChoices('choices-facturacion', FACTURACION, 'facturacion');
+
+function selectChoice(field, id, containerId){
+  state[field] = id;
+  document.querySelectorAll('#'+containerId+' .choice').forEach(b=>{
+    b.classList.toggle('sel', b.dataset.id === id);
+  });
+  updateNextEnabled();
+}
+
+function buildRoute(){
+  const route = document.getElementById('route');
+  route.innerHTML = '';
+  for(let i=1;i<=5;i++){
+    const wrap = document.createElement('div');
+    wrap.className = 'node-wrap';
+    wrap.innerHTML = '<div class="dot" data-n="'+i+'"></div>' + (i<5 ? '<div class="line" data-n="'+i+'"></div>' : '');
+    route.appendChild(wrap);
+  }
+}
+buildRoute();
+
+function updateRoute(){
+  document.querySelectorAll('.route .dot').forEach(d=>{
+    const n = +d.dataset.n;
+    d.classList.toggle('done', n < current);
+    d.classList.toggle('active', n === current);
+  });
+  document.querySelectorAll('.route .line').forEach(l=>{
+    l.classList.toggle('done', +l.dataset.n < current);
+  });
+  document.getElementById('routeLabel').textContent = 'Paso '+current+' de 5';
+  document.getElementById('routePct').textContent = Math.round((current/5)*100)+'%';
+}
+
+function updateNextEnabled(){
+  const btn = document.getElementById('btnNext');
+  let ok = false;
+  if(current===1) ok = state.nombre.trim().length>0;
+  if(current===2) ok = !!state.dolor;
+  if(current===3) ok = !!state.tiempo;
+  if(current===4) ok = !!state.facturacion;
+  if(current===5) ok = state.email.trim().length>3 && state.whatsapp.trim().length>5;
+  btn.disabled = !ok;
+  btn.textContent = current===5 ? 'Ver mi Hoja de Ruta' : 'Continuar';
+}
+
+document.getElementById('f_nombre').addEventListener('input', e=>{state.nombre = e.target.value; updateNextEnabled();});
+document.getElementById('f_email').addEventListener('input', e=>{state.email = e.target.value; updateNextEnabled();});
+document.getElementById('f_whatsapp').addEventListener('input', e=>{state.whatsapp = e.target.value; updateNextEnabled();});
+
+function showStep(n){
+  document.querySelectorAll('.step').forEach(s=> s.classList.toggle('active', +s.dataset.step === n));
+  document.getElementById('btnBack').style.visibility = n===1 ? 'hidden' : 'visible';
+  updateRoute();
+  updateNextEnabled();
+}
+
+function goTo(n){
+  document.getElementById('screen-intro').style.display = 'none';
+  document.getElementById('screen-quiz').style.display = 'block';
+  current = n;
+  showStep(current);
+}
+
+function next(){
+  if(current < 5){ current++; showStep(current); }
+  else { submitQuiz(); }
+}
+function back(){
+  if(current > 1){ current--; showStep(current); }
+}
+
+function submitQuiz(){
+  const dolor = DOLORES.find(d=>d.id===state.dolor);
+  const tiempo = TIEMPOS.find(t=>t.id===state.tiempo);
+
+  document.getElementById('resultTitle').textContent = 'Tu Hoja de Ruta, ' + (state.nombre.trim() || 'che');
+  document.getElementById('resultIntro').textContent = dolor.title;
+  document.getElementById('solutionName').textContent = dolor.solution;
+  document.getElementById('solutionText').textContent = dolor.text;
+  document.getElementById('urgencyText').textContent = tiempo.urgency;
+
+  document.getElementById('screen-quiz').style.display = 'none';
+  document.getElementById('screen-result').style.display = 'block';
+  window.scrollTo({top:0, behavior:'smooth'});
+
+  try{
+    localStorage.setItem('virar_lead_demo', JSON.stringify(state));
+  }catch(e){}
+
+  try{
+    fetch(WEBHOOK_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: JSON.stringify({
+        nombre: state.nombre,
+        dolorLabel: dolor.label,
+        tiempoLabel: tiempo.label,
+        facturacionLabel: FACTURACION.find(f => f.id === state.facturacion).label,
+        email: state.email,
+        whatsapp: state.whatsapp,
+      }),
+    });
+  }catch(e){}
+}
+
+function confirmInterest(){
+  document.getElementById('confirmBox').classList.add('show');
+}
+</script>
